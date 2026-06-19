@@ -18,11 +18,17 @@ auth.onAuthStateChanged(async (user) => {
 });
 
 // --- Section Switching ---
+const allSections = ['overview', 'classes', 'students', 'addStudent', 'teachers', 'addTeacher', 'idCards'];
 function showSection(sectionName) {
-  document.getElementById('overview-section').classList.add('hidden');
-  document.getElementById('students-section').classList.add('hidden');
-  document.getElementById('addStudent-section').classList.add('hidden');
+  allSections.forEach(s => {
+    document.getElementById(s + '-section').classList.add('hidden');
+  });
   document.getElementById(sectionName + '-section').classList.remove('hidden');
+
+  // Section khulte hi relevant data refresh karo
+  if (sectionName === 'classes') loadClassesList();
+  if (sectionName === 'teachers') loadTeachersList();
+  if (sectionName === 'idCards') loadIdCardStudentDropdown();
 }
 
 // --- Logout ---

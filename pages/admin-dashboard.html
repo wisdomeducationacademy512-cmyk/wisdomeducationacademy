@@ -21,8 +21,12 @@
       </div>
       <nav class="p-4 space-y-1">
         <a href="#" onclick="showSection('overview')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">📊 Overview</a>
+        <a href="#" onclick="showSection('classes')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">🏷️ Classes</a>
         <a href="#" onclick="showSection('students')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">🎓 Students</a>
         <a href="#" onclick="showSection('addStudent')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">➕ Add Student</a>
+        <a href="#" onclick="showSection('teachers')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">👩‍🏫 Teachers</a>
+        <a href="#" onclick="showSection('addTeacher')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">➕ Add Teacher</a>
+        <a href="#" onclick="showSection('idCards')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">🪪 ID Cards</a>
         <button onclick="logout()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-red-700 transition mt-8 text-red-200">🚪 Logout</button>
       </nav>
     </aside>
@@ -169,11 +173,141 @@
         </form>
       </section>
 
+      <!-- CLASSES SECTION -->
+      <section id="classes-section" class="hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Classes & Sections</h2>
+
+        <div id="classErrorBox" class="hidden bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm max-w-xl"></div>
+
+        <form id="addClassForm" class="bg-white p-6 rounded-xl shadow space-y-4 max-w-xl mb-6">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Class Name *</label>
+              <input type="text" id="className" required placeholder="e.g. 8 or Nursery" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Sections (comma separated)</label>
+              <input type="text" id="classSections" placeholder="e.g. A, B, C" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+            </div>
+          </div>
+          <button type="submit" id="addClassBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg transition">
+            Add Class
+          </button>
+        </form>
+
+        <div class="bg-white rounded-xl shadow overflow-hidden max-w-xl">
+          <table class="w-full text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Class</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Sections</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="classesTableBody"></tbody>
+          </table>
+          <p id="noClasses" class="text-center text-gray-400 py-8 hidden">No classes added yet.</p>
+        </div>
+      </section>
+
+      <!-- TEACHERS LIST SECTION -->
+      <section id="teachers-section" class="hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">All Teachers</h2>
+        <div class="bg-white rounded-xl shadow overflow-hidden">
+          <table class="w-full text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Teacher ID</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Name</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Subject</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Phone</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="teachersTableBody"></tbody>
+          </table>
+          <p id="noTeachers" class="text-center text-gray-400 py-8 hidden">No teachers added yet.</p>
+        </div>
+      </section>
+
+      <!-- ADD TEACHER SECTION -->
+      <section id="addTeacher-section" class="hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Add New Teacher</h2>
+
+        <div id="successBoxT" class="hidden bg-green-50 border border-green-300 text-green-800 px-4 py-4 rounded-lg mb-6"></div>
+        <div id="errorBoxT" class="hidden bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm"></div>
+
+        <form id="addTeacherForm" class="bg-white p-6 rounded-xl shadow space-y-4 max-w-2xl">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Teacher Full Name *</label>
+              <input type="text" id="teacherName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+              <input type="text" id="teacherSubject" placeholder="e.g. Mathematics" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number * (used as login password)</label>
+            <input type="text" id="teacherPhone" required placeholder="03001234567" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <textarea id="teacherAddress" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></textarea>
+          </div>
+
+          <button type="submit" id="addTeacherBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg transition">
+            Generate ID & Add Teacher
+          </button>
+        </form>
+      </section>
+
+      <!-- ID CARDS SECTION -->
+      <section id="idCards-section" class="hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Generate ID Card</h2>
+
+        <div class="bg-white p-6 rounded-xl shadow max-w-xl mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Select Student</label>
+          <select id="idCardStudentSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4">
+            <option value="">-- Select a student --</option>
+          </select>
+          <button onclick="generateIdCard()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg transition">
+            Generate Card
+          </button>
+        </div>
+
+        <!-- Printable ID Card -->
+        <div id="idCardPreview" class="hidden">
+          <div id="printableCard" class="bg-white border-2 border-indigo-900 rounded-xl p-5 w-80 shadow-lg">
+            <div class="text-center border-b border-gray-200 pb-2 mb-3">
+              <p class="font-bold text-indigo-900">🏫 WISDOM EDUCATION ACADEMY</p>
+            </div>
+            <div class="flex gap-4 items-center">
+              <div id="qrCodeContainer" class="bg-white p-1"></div>
+              <div class="text-sm">
+                <p class="font-bold text-base" id="cardName"></p>
+                <p class="text-gray-600">Class: <span id="cardClass"></span></p>
+                <p class="text-gray-600">Roll No: <span id="cardRoll"></span></p>
+                <p class="text-gray-600 font-mono text-xs mt-1" id="cardId"></p>
+              </div>
+            </div>
+          </div>
+          <button onclick="window.print()" class="mt-4 bg-gray-700 hover:bg-gray-800 text-white font-semibold px-6 py-2 rounded-lg transition">
+            🖨️ Print Card
+          </button>
+        </div>
+      </section>
+
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script src="../js/firebase-config.js"></script>
   <script src="../js/admin-dashboard.js"></script>
   <script src="../js/add-student.js"></script>
+  <script src="../js/classes.js"></script>
+  <script src="../js/add-teacher.js"></script>
+  <script src="../js/id-card.js"></script>
 </body>
 </html>

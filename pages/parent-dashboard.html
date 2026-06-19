@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parent Dashboard - School Management System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <div class="max-w-3xl mx-auto p-6">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">👨‍👩‍👦 Parent Dashboard</h1>
+        <p class="text-gray-500 text-sm">School Management System</p>
+      </div>
+      <button onclick="logout()" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg font-medium transition">Logout</button>
+    </div>
+
+    <div id="loadingBox" class="text-center text-gray-400 py-12">Loading...</div>
+
+    <!-- Student Info Card -->
+    <div id="studentCard" class="hidden bg-white rounded-xl shadow p-6 mb-6">
+      <h2 class="text-lg font-bold text-gray-800 mb-4">Student Information</h2>
+      <div class="grid grid-cols-2 gap-4 text-sm">
+        <div><p class="text-gray-500">Name</p><p id="pName" class="font-semibold"></p></div>
+        <div><p class="text-gray-500">Student ID</p><p id="pId" class="font-mono font-semibold text-indigo-600"></p></div>
+        <div><p class="text-gray-500">Class</p><p id="pClass" class="font-semibold"></p></div>
+        <div><p class="text-gray-500">Roll Number</p><p id="pRoll" class="font-semibold"></p></div>
+      </div>
+    </div>
+
+    <!-- Placeholder for upcoming features -->
+    <div class="bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-xl p-6 text-center">
+      <p class="font-medium">📅 Attendance, results, and fee tracking will appear here soon.</p>
+    </div>
+
+  </div>
+
+  <script src="../js/firebase-config.js"></script>
+  <script>
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      const userDoc = await db.collection('users').doc(user.uid).get();
+      if (!userDoc.exists || userDoc.data().role !== 'parent') {
+        alert('Access denied.');
+        await auth.signOut();
+        window.location.href = '../index.html';
+        return;
+      }
+
+      const studentId = userDoc.data().studentId;
+      const studentDoc = await db.collection('students').doc(studentId).get();
+
+      if (studentDoc.exists) {
+        const s = studentDoc.data();
+        document.getElementById('pName').textContent = s.name;
+        document.getElementById('pId').textContent = s.studentId;
+        document.getElementById('pClass').textContent = s.class + (s.section ? '-' + s.section : '');
+        document.getElementById('pRoll').textContent = s.rollNumber || '-';
+        document.getElementById('studentCard').classList.remove('hidden');
+      }
+
+      document.getElementById('loadingBox').classList.add('hidden');
+    });
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = '../index.html';
+      });
+    }
+  </script>
+</body>
+</html>
