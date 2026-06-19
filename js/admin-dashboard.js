@@ -140,9 +140,37 @@ async function deleteStudent(studentId) {
 // Students data cache karte hain taake Edit button mein safely access ho sake
 let studentsCache = {};
 
+// Class filter dropdown ko classes collection se populate karte hain
+async function populateClassFilter() {
+  try {
+    const snap = await db.collection('classes').orderBy('className').get();
+    const filterSelect = document.getElementById('classFilter');
+    const currentValue = filterSelect.value;
+    filterSelect.innerHTML = '<option value="">All Classes</option>';
+    snap.forEach(doc => {
+      const c = doc.data();
+      const option = document.createElement('option');
+      option.value = c.className;
+      option.textContent = 'Class ' + c.className;
+      filterSelect.appendChild(option);
+    });
+    filterSelect.value = currentValue;
+  } catch (error) {
+    console.error('Error loading class filter:', error);
+  }
+}
+
 async function loadStudentsList() {
   try {
-    const studentsSnap = await db.collection('students').orderBy('createdAt', 'desc').get();
+    await populateClassFilter();
+    const selectedClass = document.getElementById('classFilter').value;
+
+    let query = db.collection('students').orderBy('createdAt', 'desc');
+    if (selectedClass) {
+      query = db.collection('students').where('class', '==', selectedClass);
+    }
+
+    const studentsSnap = await query.get();
     const tableBody = document.getElementById('studentsTableBody');
     const noStudents = document.getElementById('noStudents');
 
