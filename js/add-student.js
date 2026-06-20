@@ -39,9 +39,17 @@ addStudentForm.addEventListener('submit', async (e) => {
   const studentClass = document.getElementById('studentClass').value.trim();
   const section = document.getElementById('studentSection').value.trim();
   const rollNumber = document.getElementById('rollNumber').value.trim();
+  const dob = document.getElementById('studentDOB').value;
+  const gender = document.getElementById('studentGender').value;
+  const admissionDate = document.getElementById('admissionDate').value;
+  const cnic = document.getElementById('studentCnic').value.trim();
   const parentName = document.getElementById('parentName').value.trim();
   const parentPhone = document.getElementById('parentPhone').value.trim();
+  const parentCnic = document.getElementById('parentCnic').value.trim();
+  const emergencyContact = document.getElementById('emergencyContact').value.trim();
+  const previousSchool = document.getElementById('previousSchool').value.trim();
   const address = document.getElementById('studentAddress').value.trim();
+  const photoFile = document.getElementById('studentPhoto').files[0];
 
   if (parentPhone.length < 6) {
     errorBoxAS.textContent = 'Please enter a valid parent phone number (used as login password).';
@@ -53,6 +61,15 @@ addStudentForm.addEventListener('submit', async (e) => {
   addStudentBtn.textContent = 'Creating...';
 
   try {
+    // Step 0: Photo upload karo (agar select ki hai)
+    let photoUrl = null;
+    if (photoFile) {
+      addStudentBtn.textContent = 'Uploading photo...';
+      photoUrl = await uploadPhotoToCloudinary(photoFile);
+    }
+
+    addStudentBtn.textContent = 'Creating...';
+
     // Step 1: Unique Student ID generate karo
     const studentId = await generateStudentId();
 
@@ -79,9 +96,17 @@ addStudentForm.addEventListener('submit', async (e) => {
       class: studentClass,
       section: section,
       rollNumber: rollNumber,
+      dob: dob,
+      gender: gender,
+      admissionDate: admissionDate,
+      cnic: cnic,
       parentName: parentName,
       parentPhone: parentPhone,
+      parentCnic: parentCnic,
+      emergencyContact: emergencyContact,
+      previousSchool: previousSchool,
       address: address,
+      photoUrl: photoUrl,
       status: 'active',
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
@@ -101,6 +126,7 @@ addStudentForm.addEventListener('submit', async (e) => {
     successBox.classList.remove('hidden');
 
     addStudentForm.reset();
+    document.getElementById('studentPhotoPreview').innerHTML = '📷';
     loadStudentsList();
     loadOverviewStats();
 

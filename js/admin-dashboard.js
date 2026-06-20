@@ -96,9 +96,23 @@ function openEditModal(studentId) {
   document.getElementById('editClass').value = student.class || '';
   document.getElementById('editSection').value = student.section || '';
   document.getElementById('editRoll').value = student.rollNumber || '';
+  document.getElementById('editDOB').value = student.dob || '';
+  document.getElementById('editGender').value = student.gender || '';
+  document.getElementById('editAdmissionDate').value = student.admissionDate || '';
+  document.getElementById('editCnic').value = student.cnic || '';
   document.getElementById('editParentName').value = student.parentName || '';
   document.getElementById('editParentPhone').value = student.parentPhone || '';
+  document.getElementById('editParentCnic').value = student.parentCnic || '';
+  document.getElementById('editEmergencyContact').value = student.emergencyContact || '';
+  document.getElementById('editPreviousSchool').value = student.previousSchool || '';
   document.getElementById('editAddress').value = student.address || '';
+  document.getElementById('editPhoto').value = '';
+
+  const photoPreview = document.getElementById('editPhotoPreview');
+  photoPreview.innerHTML = student.photoUrl
+    ? `<img src="${student.photoUrl}" class="w-full h-full object-cover">`
+    : '📷';
+
   document.getElementById('editErrorBox').classList.add('hidden');
   document.getElementById('editModal').classList.remove('hidden');
 }
@@ -117,17 +131,34 @@ document.getElementById('editStudentForm').addEventListener('submit', async (e) 
   editSaveBtn.textContent = 'Saving...';
 
   const studentId = document.getElementById('editStudentId').value;
+  const newPhotoFile = document.getElementById('editPhoto').files[0];
 
   try {
-    await db.collection('students').doc(studentId).update({
+    const updateData = {
       name: document.getElementById('editName').value.trim(),
       class: document.getElementById('editClass').value.trim(),
       section: document.getElementById('editSection').value.trim(),
       rollNumber: document.getElementById('editRoll').value.trim(),
+      dob: document.getElementById('editDOB').value,
+      gender: document.getElementById('editGender').value,
+      admissionDate: document.getElementById('editAdmissionDate').value,
+      cnic: document.getElementById('editCnic').value.trim(),
       parentName: document.getElementById('editParentName').value.trim(),
       parentPhone: document.getElementById('editParentPhone').value.trim(),
+      parentCnic: document.getElementById('editParentCnic').value.trim(),
+      emergencyContact: document.getElementById('editEmergencyContact').value.trim(),
+      previousSchool: document.getElementById('editPreviousSchool').value.trim(),
       address: document.getElementById('editAddress').value.trim()
-    });
+    };
+
+    // Agar nayi photo select ki hai toh upload karke URL update karo
+    if (newPhotoFile) {
+      editSaveBtn.textContent = 'Uploading photo...';
+      updateData.photoUrl = await uploadPhotoToCloudinary(newPhotoFile);
+    }
+
+    editSaveBtn.textContent = 'Saving...';
+    await db.collection('students').doc(studentId).update(updateData);
 
     closeEditModal();
     loadStudentsList();
@@ -214,7 +245,11 @@ async function loadStudentsList() {
       visibleCount++;
       const row = document.createElement('tr');
       row.className = 'border-t border-gray-100';
+      const thumbHtml = s.photoUrl
+        ? `<img src="${s.photoUrl}" class="w-9 h-9 rounded-full object-cover">`
+        : `<div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm">👤</div>`;
       row.innerHTML = `
+        <td class="px-4 py-3">${thumbHtml}</td>
         <td class="px-4 py-3 text-sm font-mono text-indigo-600">${s.studentId}</td>
         <td class="px-4 py-3 text-sm">${s.name}</td>
         <td class="px-4 py-3 text-sm">${s.class}${s.section ? '-' + s.section : ''}</td>

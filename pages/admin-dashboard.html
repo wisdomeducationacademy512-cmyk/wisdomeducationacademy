@@ -104,6 +104,7 @@
           <table class="w-full text-left">
             <thead class="bg-gray-100">
               <tr>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Photo</th>
                 <th class="px-4 py-3 text-sm font-semibold text-gray-600">Student ID</th>
                 <th class="px-4 py-3 text-sm font-semibold text-gray-600">Name</th>
                 <th class="px-4 py-3 text-sm font-semibold text-gray-600">Class</th>
@@ -127,6 +128,15 @@
 
           <form id="editStudentForm" class="space-y-3">
             <input type="hidden" id="editStudentId">
+
+            <div class="flex items-center gap-4">
+              <div id="editPhotoPreview" class="w-16 h-16 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xl overflow-hidden">📷</div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Change Photo</label>
+                <input type="file" id="editPhoto" accept="image/*" onchange="previewStudentPhoto(this, 'editPhotoPreview')" class="text-sm">
+              </div>
+            </div>
+
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Student Full Name</label>
               <input type="text" id="editName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
@@ -145,13 +155,51 @@
               <label class="block text-sm font-medium text-gray-700 mb-1">Roll Number</label>
               <input type="text" id="editRoll" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
             </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                <input type="date" id="editDOB" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                <select id="editGender" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                  <option value="">-- Select --</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Admission Date</label>
+                <input type="date" id="editAdmissionDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">B-Form / CNIC</label>
+                <input type="text" id="editCnic" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              </div>
+            </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Parent Name</label>
               <input type="text" id="editParentName" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
             </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Parent Phone (note: changing this does NOT change login password)</label>
+                <input type="text" id="editParentPhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Parent CNIC</label>
+                <input type="text" id="editParentCnic" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              </div>
+            </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Parent Phone (note: changing this does NOT change login password)</label>
-              <input type="text" id="editParentPhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact</label>
+              <input type="text" id="editEmergencyContact" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Previous School</label>
+              <input type="text" id="editPreviousSchool" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
@@ -179,6 +227,15 @@
           <div id="errorBoxAS" class="hidden bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm"></div>
 
           <form id="addStudentForm" class="space-y-4">
+            <!-- Photo Upload -->
+            <div class="flex items-center gap-4">
+              <div id="studentPhotoPreview" class="w-20 h-20 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-2xl overflow-hidden">📷</div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Student Photo</label>
+                <input type="file" id="studentPhoto" accept="image/*" onchange="previewStudentPhoto(this, 'studentPhotoPreview')" class="text-sm">
+              </div>
+            </div>
+
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Student Full Name *</label>
@@ -199,13 +256,51 @@
                 <input type="text" id="rollNumber" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
               </div>
             </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                <input type="date" id="studentDOB" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                <select id="studentGender" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                  <option value="">-- Select --</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Admission Date</label>
+                <input type="date" id="admissionDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">B-Form / CNIC Number</label>
+                <input type="text" id="studentCnic" placeholder="e.g. 33102-1234567-1" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              </div>
+            </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Parent Name *</label>
               <input type="text" id="parentName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
             </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Parent Phone Number * (used as login password)</label>
+                <input type="text" id="parentPhone" required placeholder="03001234567" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Parent CNIC</label>
+                <input type="text" id="parentCnic" placeholder="e.g. 33102-1234567-1" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              </div>
+            </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Parent Phone Number * (used as login password)</label>
-              <input type="text" id="parentPhone" required placeholder="03001234567" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Number</label>
+              <input type="text" id="emergencyContact" placeholder="Alag number agar parent na milay" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Previous School (agar transfer hai)</label>
+              <input type="text" id="previousSchool" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
@@ -376,6 +471,9 @@
             </div>
             <div class="flex gap-4 items-center">
               <div id="qrCodeContainer" class="bg-white p-1"></div>
+              <div id="cardPhotoWrap" class="hidden">
+                <img id="cardPhoto" class="w-16 h-16 rounded-lg object-cover border border-gray-200">
+              </div>
               <div class="text-sm">
                 <p class="font-bold text-base" id="cardName"></p>
                 <p class="text-gray-600" id="cardLine2Label">Class: <span id="cardClass"></span></p>
@@ -395,6 +493,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="../js/firebase-config.js"></script>
+  <script src="../js/cloudinary-config.js"></script>
   <script src="../js/admin-dashboard.js"></script>
   <script src="../js/add-student.js"></script>
   <script src="../js/classes.js"></script>

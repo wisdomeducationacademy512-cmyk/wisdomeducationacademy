@@ -89,12 +89,24 @@ async function generateStudentCard() {
   document.getElementById('cardLine3Label').innerHTML = 'Roll No: <span>' + (student.rollNumber || '-') + '</span>';
   document.getElementById('cardId').textContent = student.studentId;
 
+  const photoWrap = document.getElementById('cardPhotoWrap');
+  if (student.photoUrl) {
+    document.getElementById('cardPhoto').src = student.photoUrl;
+    photoWrap.classList.remove('hidden');
+  } else {
+    photoWrap.classList.add('hidden');
+  }
+
   drawQrCode(student.studentId);
   document.getElementById('idCardPreview').classList.remove('hidden');
 }
 
 function printIdCard() {
-  const cardHtml = document.getElementById('printableCard').innerHTML;
+  const photoWrap = document.getElementById('cardPhotoWrap');
+  const photoHtml = !photoWrap.classList.contains('hidden')
+    ? `<img src="${document.getElementById('cardPhoto').src}" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid #e5e7eb;">`
+    : '';
+
   const printWindow = window.open('', '_blank', 'width=400,height=500');
   printWindow.document.write(`
     <!DOCTYPE html>
@@ -120,6 +132,7 @@ function printIdCard() {
         </div>
         <div class="row">
           <div>${document.getElementById('qrCodeContainer').innerHTML}</div>
+          ${photoHtml}
           <div class="info">
             <p>${document.getElementById('cardName').textContent}</p>
             <p>${document.getElementById('cardLine2Label').innerHTML}</p>
@@ -159,6 +172,7 @@ async function generateTeacherCard() {
   document.getElementById('cardLine2Label').innerHTML = 'Subject: <span>' + (teacher.subject || '-') + '</span>';
   document.getElementById('cardLine3Label').innerHTML = 'Phone: <span>' + teacher.phone + '</span>';
   document.getElementById('cardId').textContent = teacher.teacherId;
+  document.getElementById('cardPhotoWrap').classList.add('hidden');
 
   drawQrCode(teacher.teacherId);
   document.getElementById('idCardPreview').classList.remove('hidden');
