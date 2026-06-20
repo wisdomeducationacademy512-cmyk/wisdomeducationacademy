@@ -83,3 +83,47 @@ async function deleteClass(className) {
     alert('Error: ' + error.message);
   }
 }
+
+// ===== CLASS/SECTION DROPDOWNS (Add Student & Edit Student forms ke liye) =====
+
+// Class dropdown ko classes collection se populate karta hai
+async function populateClassDropdown(selectId) {
+  try {
+    const snap = await db.collection('classes').orderBy('className').get();
+    const select = document.getElementById(selectId);
+    select.innerHTML = '<option value="">-- Select Class --</option>';
+    snap.forEach(doc => {
+      const c = doc.data();
+      const option = document.createElement('option');
+      option.value = c.className;
+      option.textContent = 'Class ' + c.className;
+      select.appendChild(option);
+    });
+  } catch (error) {
+    console.error('Error loading class dropdown:', error);
+  }
+}
+
+// Jab class select ho, uski sections section-dropdown mein bharta hai
+async function populateSectionDropdown(classSelectId, sectionSelectId) {
+  const className = document.getElementById(classSelectId).value;
+  const sectionSelect = document.getElementById(sectionSelectId);
+  sectionSelect.innerHTML = '<option value="">-- Select Section --</option>';
+
+  if (!className) return;
+
+  try {
+    const doc = await db.collection('classes').doc(className).get();
+    if (doc.exists) {
+      const sections = doc.data().sections || [];
+      sections.forEach(sec => {
+        const option = document.createElement('option');
+        option.value = sec;
+        option.textContent = sec;
+        sectionSelect.appendChild(option);
+      });
+    }
+  } catch (error) {
+    console.error('Error loading sections:', error);
+  }
+}

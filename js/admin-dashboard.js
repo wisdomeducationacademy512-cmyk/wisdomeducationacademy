@@ -44,6 +44,8 @@ function openAddStudentModal() {
   document.getElementById('successBox').classList.add('hidden');
   document.getElementById('errorBoxAS').classList.add('hidden');
   document.getElementById('addStudentModal').classList.remove('hidden');
+  populateClassDropdown('studentClass');
+  document.getElementById('studentSection').innerHTML = '<option value="">-- Select Section --</option>';
 }
 function closeAddStudentModal() {
   document.getElementById('addStudentModal').classList.add('hidden');
@@ -87,14 +89,18 @@ async function loadOverviewStats() {
 }
 
 // --- Open Edit Modal ---
-function openEditModal(studentId) {
+async function openEditModal(studentId) {
   const student = studentsCache[studentId];
   if (!student) return;
 
   document.getElementById('editStudentId').value = student.studentId;
   document.getElementById('editName').value = student.name || '';
+
+  await populateClassDropdown('editClass');
   document.getElementById('editClass').value = student.class || '';
+  await populateSectionDropdown('editClass', 'editSection');
   document.getElementById('editSection').value = student.section || '';
+
   document.getElementById('editRoll').value = student.rollNumber || '';
   document.getElementById('editDOB').value = student.dob || '';
   document.getElementById('editGender').value = student.gender || '';
