@@ -19,9 +19,20 @@ addClassForm.addEventListener('submit', async (e) => {
   addClassBtn.textContent = 'Adding...';
 
   try {
+    // Pehle check karo agar yeh class pehle se exist karti hai - agar haan,
+    // toh purani sections ke saath naye sections merge karo (overwrite mat karo)
+    const existingDoc = await db.collection('classes').doc(className).get();
+    let finalSections = sections;
+
+    if (existingDoc.exists) {
+      const existingSections = existingDoc.data().sections || [];
+      const merged = [...existingSections, ...sections];
+      finalSections = [...new Set(merged)]; // duplicates hatao
+    }
+
     await db.collection('classes').doc(className).set({
       className: className,
-      sections: sections,
+      sections: finalSections,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
