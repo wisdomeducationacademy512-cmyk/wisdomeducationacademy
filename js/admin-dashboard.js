@@ -18,7 +18,7 @@ auth.onAuthStateChanged(async (user) => {
 });
 
 // --- Section Switching ---
-const allSections = ['overview', 'classes', 'students', 'teachers', 'idCards'];
+const allSections = ['overview', 'classes', 'students', 'teachers', 'idCards', 'attendance', 'settings'];
 function showSection(sectionName) {
   allSections.forEach(s => {
     document.getElementById(s + '-section').classList.add('hidden');
@@ -30,6 +30,8 @@ function showSection(sectionName) {
   if (sectionName === 'students') loadStudentsList();
   if (sectionName === 'teachers') loadTeachersList();
   if (sectionName === 'idCards') loadIdCardStudentDropdown();
+  if (sectionName === 'attendance') loadAttendanceList();
+  if (sectionName === 'settings') loadSettingsForm();
 }
 
 // --- Logout ---

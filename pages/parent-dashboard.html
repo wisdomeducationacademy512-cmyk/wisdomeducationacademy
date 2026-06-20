@@ -35,9 +35,21 @@
       </div>
     </div>
 
+    <!-- Today's Attendance -->
+    <div id="attendanceCard" class="hidden bg-white rounded-xl shadow p-6 mb-6">
+      <h2 class="text-lg font-bold text-gray-800 mb-3">Today's Attendance</h2>
+      <div id="attendanceStatusBox" class="rounded-lg p-4 text-center"></div>
+    </div>
+
+    <!-- Recent Attendance History -->
+    <div id="attendanceHistoryCard" class="hidden bg-white rounded-xl shadow p-6 mb-6">
+      <h2 class="text-lg font-bold text-gray-800 mb-3">Recent Attendance</h2>
+      <div id="attendanceHistoryList" class="space-y-2 text-sm"></div>
+    </div>
+
     <!-- Placeholder for upcoming features -->
     <div class="bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-xl p-6 text-center">
-      <p class="font-medium">📅 Attendance, results, and fee tracking will appear here soon.</p>
+      <p class="font-medium">📅 Results and fee tracking will appear here soon.</p>
     </div>
 
   </div>
@@ -68,10 +80,74 @@
         document.getElementById('pClass').textContent = s.class + (s.section ? '-' + s.section : '');
         document.getElementById('pRoll').textContent = s.rollNumber || '-';
         document.getElementById('studentCard').classList.remove('hidden');
+
+        await loadTodayAttendance(studentId);
+        await loadAttendanceHistory(studentId);
       }
 
       document.getElementById('loadingBox').classList.add('hidden');
     });
+
+    // --- Aaj ki Attendance Dikhana ---
+    async function loadTodayAttendance(studentId) {
+      const today = new Date().toISOString().split('T')[0];
+      const docId = `${today}_${studentId}`;
+      const box = document.getElementById('attendanceStatusBox');
+
+      try {
+        const doc = await db.collection('attendance').doc(docId).get();
+        document.getElementById('attendanceCard').classList.remove('hidden');
+
+        if (!doc.exists) {
+          box.className = 'rounded-lg p-4 text-center bg-gray-100 text-gray-500';
+          box.innerHTML = '<p class="font-semibold">Abhi tak scan nahi hua</p>';
+          return;
+        }
+
+        const d = doc.data();
+        if (d.status === 'present') {
+          box.className = 'rounded-lg p-4 text-center bg-green-50 text-green-700';
+          box.innerHTML = `<p class="text-2xl">✅</p><p class="font-bold mt-1">Present</p><p class="text-sm">${d.timeDisplay} (${d.gate})</p>`;
+        } else {
+          box.className = 'rounded-lg p-4 text-center bg-yellow-50 text-yellow-700';
+          box.innerHTML = `<p class="text-2xl">⏰</p><p class="font-bold mt-1">Late</p><p class="text-sm">${d.timeDisplay} (${d.gate})</p>`;
+        }
+      } catch (error) {
+        console.error('Error loading attendance:', error);
+      }
+    }
+
+    // --- Pichle Records Dikhana ---
+    async function loadAttendanceHistory(studentId) {
+      try {
+        const snap = await db.collection('attendance')
+          .where('personId', '==', studentId)
+          .orderBy('date', 'desc')
+          .limit(10)
+          .get();
+
+        if (snap.empty) return;
+
+        document.getElementById('attendanceHistoryCard').classList.remove('hidden');
+        const list = document.getElementById('attendanceHistoryList');
+        list.innerHTML = '';
+
+        snap.forEach(doc => {
+          const d = doc.data();
+          const statusColor = d.status === 'present' ? 'text-green-600' : 'text-yellow-600';
+          const row = document.createElement('div');
+          row.className = 'flex justify-between items-center border-b border-gray-100 pb-2';
+          row.innerHTML = `
+            <span class="text-gray-600">${d.date}</span>
+            <span class="${statusColor} font-semibold capitalize">${d.status}</span>
+            <span class="text-gray-400 text-xs">${d.timeDisplay}</span>
+          `;
+          list.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Error loading history:', error);
+      }
+    }
 
     function logout() {
       auth.signOut().then(() => {

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gate Scanner - School Management System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body class="bg-gray-900 min-h-screen text-white">
+
+  <div class="max-w-md mx-auto p-4">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-4 pt-2">
+      <div>
+        <h1 class="text-lg font-bold">📷 Gate Scanner</h1>
+        <p class="text-gray-400 text-xs">Wisdom Education Academy</p>
+      </div>
+      <button onclick="logout()" class="bg-red-900 hover:bg-red-800 text-red-200 text-sm px-3 py-1.5 rounded-lg">Logout</button>
+    </div>
+
+    <!-- Gate Selector -->
+    <div class="bg-gray-800 rounded-xl p-3 mb-4">
+      <label class="block text-xs text-gray-400 mb-1">Currently scanning at:</label>
+      <select id="gateSelect" onchange="saveSelectedGate()" class="w-full bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600">
+        <option value="Gate 1">Gate 1</option>
+        <option value="Gate 2">Gate 2</option>
+        <option value="Gate 3">Gate 3</option>
+      </select>
+    </div>
+
+    <!-- Scanner -->
+    <div class="bg-gray-800 rounded-xl p-3 mb-4">
+      <div id="qrReader" class="rounded-lg overflow-hidden"></div>
+      <p id="scannerStatus" class="text-center text-gray-400 text-sm mt-3">Camera shuru ho rahi hai...</p>
+    </div>
+
+    <!-- Result Feedback Card -->
+    <div id="resultCard" class="hidden rounded-xl p-5 mb-4 text-center">
+      <div id="resultIcon" class="text-5xl mb-2"></div>
+      <div id="resultPhoto" class="hidden mb-2"></div>
+      <p id="resultName" class="text-xl font-bold"></p>
+      <p id="resultDetail" class="text-sm opacity-90"></p>
+      <p id="resultStatus" class="text-2xl font-bold mt-2"></p>
+      <p id="resultTime" class="text-sm opacity-75"></p>
+    </div>
+
+    <!-- Today's Count -->
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-gray-800 rounded-xl p-3 text-center">
+        <p class="text-gray-400 text-xs">Scanned Today (this gate)</p>
+        <p id="todayScanCount" class="text-2xl font-bold mt-1">0</p>
+      </div>
+      <div class="bg-gray-800 rounded-xl p-3 text-center">
+        <p class="text-gray-400 text-xs">Late Today (this gate)</p>
+        <p id="todayLateCount" class="text-2xl font-bold mt-1 text-yellow-400">0</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/attendance-logic.js"></script>
+  <script src="../js/gate-scanner.js"></script>
+</body>
+</html>
