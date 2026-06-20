@@ -109,20 +109,27 @@ async function loadTeachersList() {
     const snap = await db.collection('teachers').orderBy('createdAt', 'desc').get();
     const tableBody = document.getElementById('teachersTableBody');
     const noTeachers = document.getElementById('noTeachers');
+    const searchInput = document.getElementById('teacherSearchInput');
+    const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
     tableBody.innerHTML = '';
     teachersCache = {};
 
-    if (snap.empty) {
-      noTeachers.classList.remove('hidden');
-      return;
-    }
-    noTeachers.classList.add('hidden');
+    document.getElementById('teachersSectionTotal').textContent = snap.size;
+
+    let visibleCount = 0;
 
     snap.forEach(doc => {
       const t = doc.data();
       teachersCache[t.teacherId] = t;
 
+      if (searchTerm) {
+        const matchesSearch = t.name.toLowerCase().includes(searchTerm) ||
+                               t.teacherId.toLowerCase().includes(searchTerm);
+        if (!matchesSearch) return;
+      }
+
+      visibleCount++;
       const row = document.createElement('tr');
       row.className = 'border-t border-gray-100';
       row.innerHTML = `
@@ -136,6 +143,8 @@ async function loadTeachersList() {
       `;
       tableBody.appendChild(row);
     });
+
+    noTeachers.classList.toggle('hidden', visibleCount > 0);
   } catch (error) {
     console.error('Error loading teachers:', error);
   }

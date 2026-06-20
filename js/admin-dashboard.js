@@ -18,7 +18,7 @@ auth.onAuthStateChanged(async (user) => {
 });
 
 // --- Section Switching ---
-const allSections = ['overview', 'classes', 'students', 'addStudent', 'teachers', 'addTeacher', 'idCards'];
+const allSections = ['overview', 'classes', 'students', 'teachers', 'idCards'];
 function showSection(sectionName) {
   allSections.forEach(s => {
     document.getElementById(s + '-section').classList.add('hidden');
@@ -27,6 +27,7 @@ function showSection(sectionName) {
 
   // Section khulte hi relevant data refresh karo
   if (sectionName === 'classes') loadClassesList();
+  if (sectionName === 'students') loadStudentsList();
   if (sectionName === 'teachers') loadTeachersList();
   if (sectionName === 'idCards') loadIdCardStudentDropdown();
 }
@@ -36,6 +37,26 @@ function logout() {
   auth.signOut().then(() => {
     window.location.href = '../index.html';
   });
+}
+
+// --- Add Student Modal Open/Close ---
+function openAddStudentModal() {
+  document.getElementById('successBox').classList.add('hidden');
+  document.getElementById('errorBoxAS').classList.add('hidden');
+  document.getElementById('addStudentModal').classList.remove('hidden');
+}
+function closeAddStudentModal() {
+  document.getElementById('addStudentModal').classList.add('hidden');
+}
+
+// --- Add Teacher Modal Open/Close ---
+function openAddTeacherModal() {
+  document.getElementById('successBoxT').classList.add('hidden');
+  document.getElementById('errorBoxT').classList.add('hidden');
+  document.getElementById('addTeacherModal').classList.remove('hidden');
+}
+function closeAddTeacherModal() {
+  document.getElementById('addTeacherModal').classList.add('hidden');
 }
 
 // --- Load Overview Stats ---
@@ -121,9 +142,6 @@ document.getElementById('editStudentForm').addEventListener('submit', async (e) 
 });
 
 // --- Delete Student ---
-// Note: Yeh sirf Firestore record delete karta hai. Login account (Firebase Auth)
-// alag se delete karna padega Firebase Console > Authentication > Users se,
-// kyunki client-side se dusre user ka auth account delete karna security restriction hai.
 async function deleteStudent(studentId) {
   const confirmDelete = confirm(`Kya tum sach mein "${studentId}" ko delete karna chahte ho?\n\nNote: Login account abhi bhi Firebase Console se manually delete karna hoga.`);
   if (!confirmDelete) return;
@@ -137,6 +155,7 @@ async function deleteStudent(studentId) {
     alert('Error deleting: ' + error.message);
   }
 }
+
 // Students data cache karte hain taake Edit button mein safely access ho sake
 let studentsCache = {};
 
@@ -155,6 +174,7 @@ async function populateClassFilter() {
       filterSelect.appendChild(option);
     });
     filterSelect.value = currentValue;
+    document.getElementById('studentsSectionClasses').textContent = snap.size;
   } catch (error) {
     console.error('Error loading class filter:', error);
   }
@@ -164,6 +184,7 @@ async function loadStudentsList() {
   try {
     await populateClassFilter();
     const selectedClass = document.getElementById('classFilter').value;
+    const searchTerm = (document.getElementById('studentSearchInput').value || '').trim().toLowerCase();
 
     let query = db.collection('students').orderBy('createdAt', 'desc');
     if (selectedClass) {
@@ -177,16 +198,20 @@ async function loadStudentsList() {
     tableBody.innerHTML = '';
     studentsCache = {};
 
-    if (studentsSnap.empty) {
-      noStudents.classList.remove('hidden');
-      return;
-    }
-    noStudents.classList.add('hidden');
+    let visibleCount = 0;
 
     studentsSnap.forEach(doc => {
       const s = doc.data();
       studentsCache[s.studentId] = s;
 
+      // Search filter (name ya ID se match karo)
+      if (searchTerm) {
+        const matchesSearch = s.name.toLowerCase().includes(searchTerm) ||
+                               s.studentId.toLowerCase().includes(searchTerm);
+        if (!matchesSearch) return;
+      }
+
+      visibleCount++;
       const row = document.createElement('tr');
       row.className = 'border-t border-gray-100';
       row.innerHTML = `
@@ -201,6 +226,9 @@ async function loadStudentsList() {
       `;
       tableBody.appendChild(row);
     });
+
+    document.getElementById('studentsSectionTotal').textContent = studentsSnap.size;
+    noStudents.classList.toggle('hidden', visibleCount > 0);
   } catch (error) {
     console.error('Error loading students:', error);
   }

@@ -93,6 +93,47 @@ async function generateStudentCard() {
   document.getElementById('idCardPreview').classList.remove('hidden');
 }
 
+function printIdCard() {
+  const cardHtml = document.getElementById('printableCard').innerHTML;
+  const printWindow = window.open('', '_blank', 'width=400,height=500');
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Print ID Card</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .card { border: 2px solid #312e81; border-radius: 12px; padding: 16px; width: 300px; }
+        .header { text-align: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 10px; }
+        .header p:first-child { font-weight: bold; color: #312e81; margin: 0; }
+        .header p:last-child { font-size: 11px; color: #6b7280; text-transform: uppercase; margin: 2px 0 0 0; }
+        .row { display: flex; gap: 14px; align-items: center; }
+        .info p { margin: 2px 0; font-size: 14px; color: #374151; }
+        .info p:first-child { font-weight: bold; font-size: 16px; color: #111827; }
+      </style>
+    </head>
+    <body onload="window.print(); window.onafterprint = function(){ window.close(); }">
+      <div class="card">
+        <div class="header">
+          <p>🏫 WISDOM EDUCATION ACADEMY</p>
+          <p>${document.getElementById('cardTypeLabel').textContent}</p>
+        </div>
+        <div class="row">
+          <div>${document.getElementById('qrCodeContainer').innerHTML}</div>
+          <div class="info">
+            <p>${document.getElementById('cardName').textContent}</p>
+            <p>${document.getElementById('cardLine2Label').innerHTML}</p>
+            <p>${document.getElementById('cardLine3Label').innerHTML}</p>
+            <p style="font-family: monospace; font-size: 11px;">${document.getElementById('cardId').textContent}</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
 async function generateTeacherCard() {
   const teacherId = document.getElementById('idCardTeacherSelect').value;
   if (!teacherId) {
