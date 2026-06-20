@@ -44,13 +44,35 @@ function getSelectedGate() {
   return document.getElementById('gateSelect').value;
 }
 
+// --- Camera Switch (Front/Back) ---
+function getSavedFacingMode() {
+  return localStorage.getItem('cameraFacingMode') || 'environment';
+}
+
+async function switchCamera() {
+  const current = getSavedFacingMode();
+  const next = current === 'environment' ? 'user' : 'environment';
+  localStorage.setItem('cameraFacingMode', next);
+
+  document.getElementById('scannerStatus').textContent = 'Camera switch ho rahi hai...';
+
+  if (html5QrCode) {
+    try {
+      await html5QrCode.stop();
+      html5QrCode.clear();
+    } catch (e) { /* ignore agar already stopped hai */ }
+  }
+
+  startScanner();
+}
+
 // --- Camera Scanner Start ---
 function startScanner() {
   html5QrCode = new Html5Qrcode("qrReader");
   const config = { fps: 10, qrbox: { width: 230, height: 230 } };
 
   html5QrCode.start(
-    { facingMode: "environment" },
+    { facingMode: getSavedFacingMode() },
     config,
     onScanSuccess,
     () => { /* scan errors ignore karo, yeh normal hai jab tak code na mile */ }
