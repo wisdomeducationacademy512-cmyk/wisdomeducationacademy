@@ -44,15 +44,29 @@ function getSelectedGate() {
   return document.getElementById('gateSelect').value;
 }
 
-// --- Camera Switch (Front/Back) ---
-function getSavedFacingMode() {
-  return localStorage.getItem('cameraFacingMode') || 'environment';
+// --- Camera List & Switching ---
+let availableCameras = [];
+let currentCameraIndex = 0;
+
+async function loadCameraList() {
+  try {
+    availableCameras = await Html5Qrcode.getCameras();
+    const savedIndex = parseInt(localStorage.getItem('cameraIndex') || '0');
+    currentCameraIndex = (savedIndex < availableCameras.length) ? savedIndex : 0;
+  } catch (err) {
+    console.error('Camera list error:', err);
+    availableCameras = [];
+  }
 }
 
 async function switchCamera() {
-  const current = getSavedFacingMode();
-  const next = current === 'environment' ? 'user' : 'environment';
-  localStorage.setItem('cameraFacingMode', next);
+  if (availableCameras.length < 2) {
+    alert('Sirf ek camera mili. Switch karne ke liye device mein 2 cameras chahiye.');
+    return;
+  }
+
+  currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
+  localStorage.setItem('cameraIndex', currentCameraIndex);
 
   document.getElementById('scannerStatus').textContent = 'Camera switch ho rahi hai...';
 
@@ -67,12 +81,20 @@ async function switchCamera() {
 }
 
 // --- Camera Scanner Start ---
-function startScanner() {
+async function startScanner() {
   html5QrCode = new Html5Qrcode("qrReader");
   const config = { fps: 10, qrbox: { width: 230, height: 230 } };
 
+  if (availableCameras.length === 0) {
+    await loadCameraList();
+  }
+
+  const cameraTarget = availableCameras.length > 0
+    ? availableCameras[currentCameraIndex].id
+    : { facingMode: "environment" };
+
   html5QrCode.start(
-    { facingMode: getSavedFacingMode() },
+    cameraTarget,
     config,
     onScanSuccess,
     () => { /* scan errors ignore karo, yeh normal hai jab tak code na mile */ }
