@@ -10,6 +10,7 @@ addClassForm.addEventListener('submit', async (e) => {
 
   const className = document.getElementById('className').value.trim();
   const sectionsRaw = document.getElementById('classSections').value.trim();
+  const monthlyFee = parseFloat(document.getElementById('classMonthlyFee').value) || 0;
   const sections = sectionsRaw
     ? sectionsRaw.split(',').map(s => s.trim()).filter(s => s.length > 0)
     : [];
@@ -33,6 +34,7 @@ addClassForm.addEventListener('submit', async (e) => {
     await db.collection('classes').doc(className).set({
       className: className,
       sections: finalSections,
+      monthlyFee: monthlyFee || (existingDoc.exists ? (existingDoc.data().monthlyFee || 0) : 0),
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
@@ -72,6 +74,7 @@ async function loadClassesList() {
       row.innerHTML = `
         <td class="px-4 py-3 text-sm font-semibold">${c.className}</td>
         <td class="px-4 py-3 text-sm">${(c.sections || []).join(', ') || '-'}</td>
+        <td class="px-4 py-3 text-sm">${c.monthlyFee ? 'Rs. ' + c.monthlyFee : '-'}</td>
         <td class="px-4 py-3 text-sm">
           <button onclick="deleteClass('${c.className}')" class="text-red-600 hover:underline">Delete</button>
         </td>

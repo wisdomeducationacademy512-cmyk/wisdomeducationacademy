@@ -40,7 +40,11 @@
         <a href="#" onclick="showSection('students')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">🎓 Students</a>
         <a href="#" onclick="showSection('teachers')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">👩‍🏫 Teachers</a>
         <a href="#" onclick="showSection('idCards')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">🪪 ID Cards</a>
+        <a href="#" onclick="showSection('fees')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">💰 Fees</a>
+        <a href="#" onclick="showSection('exams')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">📝 Exams & Results</a>
+        <a href="#" onclick="showSection('notices')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">📢 Notices</a>
         <a href="#" onclick="showSection('attendance')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">📅 Attendance</a>
+        <a href="#" onclick="showSection('fees')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">💰 Fees</a>
         <a href="#" onclick="showSection('settings')" class="nav-link block px-4 py-3 rounded-lg hover:bg-indigo-800 transition">⚙️ Settings</a>
         <button onclick="logout()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-red-700 transition mt-8 text-red-200">🚪 Logout</button>
       </nav>
@@ -341,6 +345,10 @@
               <input type="text" id="classSections" placeholder="e.g. A, B, C" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
             </div>
           </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Monthly Fee (Rs.)</label>
+            <input type="number" id="classMonthlyFee" min="0" placeholder="e.g. 3000" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+          </div>
           <button type="submit" id="addClassBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg transition">
             Add Class
           </button>
@@ -352,6 +360,7 @@
               <tr>
                 <th class="px-4 py-3 text-sm font-semibold text-gray-600">Class</th>
                 <th class="px-4 py-3 text-sm font-semibold text-gray-600">Sections</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Monthly Fee</th>
                 <th class="px-4 py-3 text-sm font-semibold text-gray-600">Actions</th>
               </tr>
             </thead>
@@ -538,6 +547,123 @@
         </div>
       </section>
 
+      <!-- FEES SECTION -->
+      <section id="fees-section" class="hidden">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold text-gray-800">Fees</h2>
+          <button onclick="openRecordPaymentModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-lg transition">
+            ➕ Record Payment
+          </button>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          <div class="bg-white p-4 rounded-xl shadow">
+            <p class="text-gray-500 text-xs">Collected This Month</p>
+            <p id="feesCollectedThisMonth" class="text-2xl font-bold text-green-600 mt-1">Rs. 0</p>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow">
+            <p class="text-gray-500 text-xs">Pending This Month</p>
+            <p id="feesPendingCount" class="text-2xl font-bold text-red-600 mt-1">0</p>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow">
+            <p class="text-gray-500 text-xs">Pending Amount</p>
+            <p id="feesPendingAmount" class="text-2xl font-bold text-red-600 mt-1">Rs. 0</p>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-2 mb-4">
+          <button onclick="switchFeesTab('paid')" id="feesTabPaidBtn" class="px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 text-white">Recent Payments</button>
+          <button onclick="switchFeesTab('pending')" id="feesTabPendingBtn" class="px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-600">Pending (This Month)</button>
+        </div>
+
+        <!-- Paid List -->
+        <div id="feesPaidTable" class="bg-white rounded-xl shadow overflow-hidden">
+          <table class="w-full text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Student</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Class</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Month</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Amount</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Date</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Receipt</th>
+              </tr>
+            </thead>
+            <tbody id="feesPaidTableBody"></tbody>
+          </table>
+          <p id="noFeesPaid" class="text-center text-gray-400 py-8 hidden">No payments recorded yet.</p>
+        </div>
+
+        <!-- Pending List -->
+        <div id="feesPendingTable" class="hidden bg-white rounded-xl shadow overflow-hidden">
+          <table class="w-full text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Student</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Class</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Amount Due</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Parent Phone</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Action</th>
+              </tr>
+            </thead>
+            <tbody id="feesPendingTableBody"></tbody>
+          </table>
+          <p id="noFeesPending" class="text-center text-gray-400 py-8 hidden">No pending fees this month. 🎉</p>
+        </div>
+      </section>
+
+      <!-- RECORD PAYMENT MODAL -->
+      <div id="recordPaymentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-gray-800">Record Fee Payment</h2>
+            <button onclick="closeRecordPaymentModal()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+          </div>
+
+          <div id="feeErrorBox" class="hidden bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm"></div>
+
+          <form id="recordPaymentForm" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Select Student *</label>
+              <select id="feeStudentSelect" required onchange="autofillFeeAmount()" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                <option value="">-- Select Student --</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Month *</label>
+                <input type="month" id="feeMonth" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Amount (Rs.) *</label>
+                <input type="number" id="feeAmount" required min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Payment Date *</label>
+                <input type="date" id="feePaymentDate" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                <select id="feeMethod" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                  <option value="Cash">Cash</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="Online">Online</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" id="recordPaymentBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg transition">
+              Record Payment & Generate Receipt
+            </button>
+          </form>
+        </div>
+      </div>
+
       <!-- SETTINGS SECTION -->
       <section id="settings-section" class="hidden">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Attendance Timing Settings</h2>
@@ -606,6 +732,146 @@
         </form>
       </section>
 
+      <!-- FEES SECTION -->
+      <section id="fees-section" class="hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Fee Management</h2>
+
+        <!-- Fee Structure Setup -->
+        <div class="bg-white p-5 rounded-xl shadow mb-6 max-w-xl">
+          <h3 class="font-bold text-gray-800 mb-3">Monthly Fee per Class</h3>
+          <div class="flex gap-3">
+            <select id="feeStructureClass" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg">
+              <option value="">-- Select Class --</option>
+            </select>
+            <input type="number" id="feeStructureAmount" placeholder="Amount (Rs.)" class="w-40 px-4 py-2 border border-gray-300 rounded-lg">
+            <button onclick="saveFeeStructure()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2 rounded-lg transition">Save</button>
+          </div>
+          <div id="feeStructureList" class="mt-3 text-sm text-gray-600 space-y-1"></div>
+        </div>
+
+        <!-- Month + Class Filter -->
+        <div class="flex flex-wrap gap-3 mb-4 items-center">
+          <input type="month" id="feeMonthFilter" onchange="loadFeesList()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          <select id="feeClassFilter" onchange="loadFeesList()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+            <option value="">All Classes</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 mb-4">
+          <div class="bg-white p-4 rounded-xl shadow">
+            <p class="text-gray-500 text-xs">Collected This Month</p>
+            <p id="feeCollectedTotal" class="text-xl font-bold text-green-600 mt-1">Rs. 0</p>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow">
+            <p class="text-gray-500 text-xs">Pending This Month</p>
+            <p id="feePendingTotal" class="text-xl font-bold text-red-600 mt-1">Rs. 0</p>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow">
+            <p class="text-gray-500 text-xs">Paid Students</p>
+            <p id="feePaidCount" class="text-xl font-bold text-indigo-600 mt-1">0</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow overflow-hidden">
+          <table class="w-full text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Student ID</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Name</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Class</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Amount</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Status</th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-600">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="feesTableBody"></tbody>
+          </table>
+          <p id="noFees" class="text-center text-gray-400 py-8 hidden">No students found.</p>
+        </div>
+      </section>
+
+      <!-- MARK FEE PAID MODAL -->
+      <div id="markPaidModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm">
+          <h3 class="text-lg font-bold text-gray-800 mb-4">Mark Fee as Paid</h3>
+          <input type="hidden" id="payStudentId">
+          <input type="hidden" id="payMonth">
+          <div class="mb-3">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Amount Received (Rs.)</label>
+            <input type="number" id="payAmount" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Payment Date</label>
+            <input type="date" id="payDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+          </div>
+          <div class="flex gap-3">
+            <button onclick="confirmFeePaid()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition">Confirm Payment</button>
+            <button onclick="closeMarkPaidModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 rounded-lg transition">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXAMS & RESULTS SECTION -->
+      <section id="exams-section" class="hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Exams & Results</h2>
+
+        <!-- Create Exam -->
+        <div class="bg-white p-5 rounded-xl shadow mb-6 max-w-xl">
+          <h3 class="font-bold text-gray-800 mb-3">Create New Exam</h3>
+          <div class="flex gap-3">
+            <input type="text" id="examName" placeholder="e.g. Mid Term 2026" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg">
+            <input type="date" id="examDate" class="px-4 py-2 border border-gray-300 rounded-lg">
+            <button onclick="createExam()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2 rounded-lg transition">Create</button>
+          </div>
+        </div>
+
+        <!-- Select Exam + Student to Enter Marks -->
+        <div class="bg-white p-5 rounded-xl shadow mb-6 max-w-2xl">
+          <h3 class="font-bold text-gray-800 mb-3">Enter / View Result</h3>
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <select id="resultExamSelect" onchange="loadStudentResult()" class="px-4 py-2 border border-gray-300 rounded-lg">
+              <option value="">-- Select Exam --</option>
+            </select>
+            <select id="resultStudentSelect" onchange="loadStudentResult()" class="px-4 py-2 border border-gray-300 rounded-lg">
+              <option value="">-- Select Student --</option>
+            </select>
+          </div>
+
+          <div id="subjectsList" class="space-y-2 mb-3"></div>
+
+          <div class="flex gap-3 mb-3">
+            <input type="text" id="newSubjectName" placeholder="Subject name" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg">
+            <input type="number" id="newSubjectObtained" placeholder="Obtained" class="w-28 px-4 py-2 border border-gray-300 rounded-lg">
+            <input type="number" id="newSubjectTotal" placeholder="Total" class="w-28 px-4 py-2 border border-gray-300 rounded-lg">
+            <button onclick="addSubjectRow()" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg">Add</button>
+          </div>
+
+          <div class="flex justify-between items-center border-t pt-3">
+            <p class="text-sm text-gray-600">Total: <span id="resultTotalDisplay" class="font-bold">0 / 0</span> (<span id="resultPercentDisplay" class="font-bold">0%</span>)</p>
+            <button onclick="saveResult()" id="saveResultBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg transition">Save Result</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- NOTICES SECTION -->
+      <section id="notices-section" class="hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Notice Board</h2>
+
+        <div class="bg-white p-5 rounded-xl shadow mb-6 max-w-xl">
+          <h3 class="font-bold text-gray-800 mb-3">Post New Notice</h3>
+          <div class="space-y-3">
+            <input type="text" id="noticeTitle" placeholder="Notice title" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+            <textarea id="noticeMessage" placeholder="Notice details..." class="w-full px-4 py-2 border border-gray-300 rounded-lg" rows="3"></textarea>
+            <select id="noticeTargetClass" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+              <option value="">All Classes (Everyone)</option>
+            </select>
+            <button onclick="postNotice()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition">Post Notice</button>
+          </div>
+        </div>
+
+        <div id="noticesList" class="space-y-3 max-w-xl"></div>
+      </section>
+
     </main>
   </div>
 
@@ -620,5 +886,8 @@
   <script src="../js/id-card.js"></script>
   <script src="../js/settings.js"></script>
   <script src="../js/attendance-view.js"></script>
+  <script src="../js/fees.js"></script>
+  <script src="../js/exams.js"></script>
+  <script src="../js/notices.js"></script>
 </body>
 </html>

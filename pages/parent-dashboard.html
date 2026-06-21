@@ -47,10 +47,26 @@
       <div id="attendanceHistoryList" class="space-y-2 text-sm"></div>
     </div>
 
-    <!-- Placeholder for upcoming features -->
-    <div class="bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-xl p-6 text-center">
-      <p class="font-medium">📅 Results and fee tracking will appear here soon.</p>
+    <!-- Fee Status -->
+    <div id="feeCard" class="hidden bg-white rounded-xl shadow p-6 mb-6">
+      <h2 class="text-lg font-bold text-gray-800 mb-3">This Month's Fee</h2>
+      <div id="feeStatusBox" class="rounded-lg p-4 text-center"></div>
     </div>
+
+    <!-- Results -->
+    <div id="resultsCard" class="hidden bg-white rounded-xl shadow p-6 mb-6">
+      <h2 class="text-lg font-bold text-gray-800 mb-3">📋 Exam Results</h2>
+      <div id="parentResultsList" class="space-y-3"></div>
+    </div>
+
+    <!-- Notices -->
+    <div id="noticesCard" class="hidden bg-white rounded-xl shadow p-6 mb-6">
+      <h2 class="text-lg font-bold text-gray-800 mb-3">📢 Notices</h2>
+      <div id="parentNoticesList" class="space-y-3"></div>
+    </div>
+
+    <!-- Footer note -->
+    <p class="text-center text-gray-400 text-xs pb-6">School Management System</p>
 
   </div>
 
@@ -83,10 +99,98 @@
 
         await loadTodayAttendance(studentId);
         await loadAttendanceHistory(studentId);
+        await loadFeeStatus(studentId, s.class);
+        await loadParentResults(studentId);
+        await loadParentNotices(s.class);
       }
 
       document.getElementById('loadingBox').classList.add('hidden');
     });
+
+    // --- Fee Status (Current Month) ---
+    async function loadFeeStatus(studentId, studentClass) {
+      const now = new Date();
+      const month = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+      const box = document.getElementById('feeStatusBox');
+
+      try {
+        document.getElementById('feeCard').classList.remove('hidden');
+        const doc = await db.collection('fees').doc(`${studentId}_${month}`).get();
+
+        if (doc.exists && doc.data().status === 'paid') {
+          const f = doc.data();
+          box.className = 'rounded-lg p-4 text-center bg-green-50 text-green-700';
+          box.innerHTML = `<p class="text-2xl">✅</p><p class="font-bold mt-1">Paid</p><p class="text-sm">Rs. ${f.amount} on ${f.paidDate}</p>`;
+        } else {
+          // Fee structure se amount nikalo
+          let amount = 0;
+          const structDoc = await db.collection('feeStructure').doc(studentClass).get();
+          if (structDoc.exists) amount = structDoc.data().monthlyAmount;
+
+          box.className = 'rounded-lg p-4 text-center bg-red-50 text-red-700';
+          box.innerHTML = `<p class="text-2xl">⚠️</p><p class="font-bold mt-1">Unpaid</p><p class="text-sm">${amount ? 'Rs. ' + amount : 'Contact school office'}</p>`;
+        }
+      } catch (error) {
+        console.error('Error loading fee status:', error);
+      }
+    }
+
+    // --- Exam Results ---
+    async function loadParentResults(studentId) {
+      try {
+        const snap = await db.collection('results').where('studentId', '==', studentId).get();
+        if (snap.empty) return;
+
+        document.getElementById('resultsCard').classList.remove('hidden');
+        const list = document.getElementById('parentResultsList');
+        list.innerHTML = '';
+
+        snap.forEach(doc => {
+          const r = doc.data();
+          const row = document.createElement('div');
+          row.className = 'border-b border-gray-100 pb-3';
+          row.innerHTML = `
+            <p class="font-semibold text-gray-800">${r.examName}</p>
+            <p class="text-sm text-gray-600">${r.totalObtained} / ${r.totalMax} (${r.percentage.toFixed(1)}%)</p>
+          `;
+          list.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Error loading results:', error);
+      }
+    }
+
+    // --- Notices ---
+    async function loadParentNotices(studentClass) {
+      try {
+        const snap = await db.collection('notices').orderBy('createdAt', 'desc').limit(10).get();
+        const relevant = [];
+        snap.forEach(doc => {
+          const n = doc.data();
+          if (!n.targetClass || n.targetClass === studentClass) relevant.push(n);
+        });
+
+        if (relevant.length === 0) return;
+
+        document.getElementById('noticesCard').classList.remove('hidden');
+        const list = document.getElementById('parentNoticesList');
+        list.innerHTML = '';
+
+        relevant.forEach(n => {
+          const date = n.createdAt ? n.createdAt.toDate().toLocaleDateString('en-PK') : '';
+          const card = document.createElement('div');
+          card.className = 'border-b border-gray-100 pb-3';
+          card.innerHTML = `
+            <p class="font-semibold text-gray-800">${n.title}</p>
+            <p class="text-xs text-gray-400">${date}</p>
+            <p class="text-sm text-gray-600 mt-1">${n.message}</p>
+          `;
+          list.appendChild(card);
+        });
+      } catch (error) {
+        console.error('Error loading notices:', error);
+      }
+    }
 
     // --- Aaj ki Attendance Dikhana ---
     async function loadTodayAttendance(studentId) {
